@@ -28,50 +28,64 @@
             color: #333;
             margin-bottom: 2rem;
         }
-        .instructions {
+        #vapi-container {
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .loading {
             color: #666;
-            margin: 2rem 0;
-            line-height: 1.6;
+            font-size: 1.1rem;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Room Reservation Assistant</h1>
-        <p class="instructions">
-            Click the microphone button in the bottom right corner to start booking your room.
-        </p>
+        <div id="vapi-container">
+            <p class="loading">Loading assistant...</p>
+        </div>
     </div>
 
+    <!-- Import Vapi SDK -->
+    <script src="https://unpkg.com/@vapi-ai/web@latest/dist/index.js"></script>
     <script>
-        var vapiInstance = null;
-        const assistant = "0c90f001-5b6c-427b-9559-bb61d9971f6b"; // Replace with your assistant ID
-        const apiKey = "750a9723-340a-413b-a37b-bb0752e50b1f"; // Replace with your Public key
-        const buttonConfig = {
-            // Customize the widget appearance
-            position: "bottom-right",
-            size: "large",
-            theme: {
-                primaryColor: "#007bff",
-                backgroundColor: "#ffffff"
-            }
-        };
-
-        (function (d, t) {
-            var g = document.createElement(t),
-            s = d.getElementsByTagName(t)[0];
-            g.src = "https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js";
-            g.defer = true;
-            g.async = true;
-            s.parentNode.insertBefore(g, s);
-            g.onload = function () {
-                vapiInstance = window.vapiSDK.run({
-                    apiKey: apiKey,
-                    assistant: assistant,
-                    config: buttonConfig,
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const vapi = new Vapi("750a9723-340a-413b-a37b-bb0752e50b1f");
+                
+                // Initialize the assistant with your specific configuration
+                const assistant = await vapi.start({
+                    assistantId: "0c90f001-5b6c-427b-9559-bb61d9971f6b",
+                    container: document.getElementById('vapi-container'),
+                    // Add any additional configuration options here
+                    config: {
+                        // Customize the appearance and behavior
+                        theme: {
+                            primaryColor: "#007bff",
+                            backgroundColor: "#ffffff"
+                        },
+                        // Add any other configuration options
+                    }
                 });
-            };
-        })(document, "script");
+
+                // Remove loading message
+                document.querySelector('.loading').style.display = 'none';
+
+                // Error handling
+                assistant.on('error', (error) => {
+                    console.error('Vapi Assistant Error:', error);
+                    document.getElementById('vapi-container').innerHTML = 
+                        '<p style="color: #dc3545;">An error occurred. Please refresh the page or try again later.</p>';
+                });
+
+            } catch (error) {
+                console.error('Initialization Error:', error);
+                document.getElementById('vapi-container').innerHTML = 
+                    '<p style="color: #dc3545;">Failed to load the assistant. Please refresh the page or try again later.</p>';
+            }
+        });
     </script>
 </body>
 </html>
